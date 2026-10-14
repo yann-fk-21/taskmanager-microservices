@@ -15,6 +15,21 @@ const getUsers = async (req, res) => {
   }
 };
 
+const getUserByEmail = async (req, res) => {
+  try {
+    const email = req.params.email;
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(status.NOT_FOUND).json({ message: 'User not found' });
+    }
+    return res.status(status.OK).json({ user: user });
+  } catch (error) {
+    return res
+      .status(status.INTERNAL_SERVER_ERROR)
+      .json({ message: 'Error fetching user', error: error.message });
+  }
+};
+
 const getUserById = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -89,4 +104,11 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getUserById, createUser, updateUser, deleteUser };
+module.exports = {
+  getUsers,
+  getUserById,
+  getUserByEmail,
+  createUser,
+  updateUser,
+  deleteUser,
+};
