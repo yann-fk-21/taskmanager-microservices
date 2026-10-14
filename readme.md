@@ -34,6 +34,8 @@ MONGO_DB_USER=mongodb://127.0.0.1:27017/users
 
 For `task-service`, configure `PORT_TASK_SERVICE` and `MONGO_DB_TASK`. The port for `auth-service` is optional and defaults to `3001`. The default port for `task-service` is `3002`. `user-service` requires `PORT_USER_SERVICE`.
 
+`task-service` uses `USER_SERVICE_URL` to look up users before creating tasks. It defaults to `http://localhost:8000/api/v1/users`; set it in the `task-service` `.env` file if the user service runs at another address.
+
 Do not share `.env` files; they may contain sensitive information.
 
 ## Available routes

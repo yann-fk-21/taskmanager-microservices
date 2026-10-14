@@ -1,5 +1,6 @@
 const Task = require('../models/task.model');
 const { status } = require('http-status');
+const { getUserById } = require('../utils/utils');
 
 const getTasks = async (req, res) => {
   try {
@@ -11,6 +12,32 @@ const getTasks = async (req, res) => {
     return res
       .status(status.INTERNAL_SERVER_ERROR)
       .json({ message: 'Error fetching tasks', error: error.message });
+  }
+};
+
+const getTasksByUserId = async (req, res) => {
+  try {
+    const user_id = req.params.id;
+    const fetchedUser = await getUserById(user_id);
+
+    if (!fetchedUser) {
+      return res
+        .status(status.NOT_FOUND)
+        .json({ message: 'User not found', tasks: [] });
+    }
+
+    const userTasks = await Task.find().where({ user_id: user_id }).exec();
+    return res
+      .status(status.OK)
+      .json({ message: "Getting successfully user's tasks", tasks: userTasks });
+  } catch (error) {
+    return res
+      .status(
+        error.statusCode == status.BAD_GATEWAY
+          ? status.BAD_GATEWAY
+          : status.INTERNAL_SERVER_ERROR,
+      )
+      .json({ message: "Error getting user's tasks", error: error.message });
   }
 };
 
@@ -35,14 +62,25 @@ const getTask = async (req, res) => {
 
 const createTask = async (req, res) => {
   try {
+    const { user_id } = req.body;
+    const fetchedUser = await getUserById(user_id);
+
+    if (!fetchedUser) {
+      return res.status(status.NOT_FOUND).json({ message: 'User not found!' });
+    }
+
     const taskData = req.body;
-    const createdTask = Task.create(taskData);
+    const createdTask = await Task.create(taskData);
     return res
       .status(status.CREATED)
       .json({ message: 'Task is created', task: createdTask });
   } catch (error) {
     return res
-      .status(status.INTERNAL_SERVER_ERROR)
+      .status(
+        error.statusCode === status.BAD_GATEWAY
+          ? status.BAD_GATEWAY
+          : status.INTERNAL_SERVER_ERROR,
+      )
       .json({ message: 'Error creating task', error: error.message });
   }
 };
@@ -51,7 +89,7 @@ const updateTask = async (req, res) => {
   try {
     const taskId = req.params.id;
     const taskData = req.body;
-    const task = Task.findByIdAndUpdate(id, taskData);
+    const task = await Task.findByIdAndUpdate(id, taskData);
 
     if (!task) {
       return res.status(status.NOT_FOUND).json({ message: 'Task not found!' });
@@ -72,7 +110,7 @@ const updateTask = async (req, res) => {
 const deletetask = async (req, res) => {
   try {
     const taskId = req.params.id;
-    const deletedTask = Task.findByIdAndDelete(taskId);
+    const deletedTask = await Task.findByIdAndDelete(taskId);
 
     if (!deletedTask) {
       return res.status(status.NOT_FOUND).json({ message: 'Task not found!' });
@@ -86,4 +124,11 @@ const deletetask = async (req, res) => {
   }
 };
 
-module.exports = { getTasks, getTask, createTask, deletetask, updateTask };
+module.exports = {
+  getTasks,
+  getTask,
+  getTasksByUserId,
+  createTask,
+  deletetask,
+  updateTask,
+};
