@@ -11,11 +11,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api/v1/tasks', taskRoutes);
 
-<<<<<<< HEAD
-const port = process.env.PORT_TASK_SERVICE || 3002;
-=======
-const port = process.env.PORT_TASK_SERVICE || 8001;
->>>>>>> 1c3b474 (feat: add api gateway)
+const port = process.env.PORT_TASK_SERVICE || 8002;
 
 app.listen(port, async () => {
   await connectBD();
