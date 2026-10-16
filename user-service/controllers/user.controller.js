@@ -1,6 +1,10 @@
 const User = require('../models/user.model');
 const { status } = require('http-status');
 const { hashPassword } = require('../config/crypt.config');
+<<<<<<< HEAD
+=======
+const { checkAuthorization } = require('../utils/utils');
+>>>>>>> 1c3b474 (feat: add api gateway)
 
 const getUsers = async (req, res) => {
   try {
@@ -47,9 +51,14 @@ const getUserById = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
+<<<<<<< HEAD
   user_data = req.body;
 
   try {
+=======
+  try {
+    const user_data = req.body;
+>>>>>>> 1c3b474 (feat: add api gateway)
     const hashedUserPassord = await hashPassword(user_data.password);
     user_data.password = hashedUserPassord;
     const newUser = await User.create(user_data);
@@ -66,6 +75,13 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
+<<<<<<< HEAD
+=======
+
+    const token = req.headers.authorization?.split(' ')[1];
+    checkAuthorization(res, token);
+
+>>>>>>> 1c3b474 (feat: add api gateway)
     const updatedUser = await User.findByIdAndUpdate(userId, req.body);
     if (!updatedUser) {
       return res.status(status.NOT_FOUND).json({ message: 'User not found' });
@@ -85,6 +101,13 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
+<<<<<<< HEAD
+=======
+
+    const token = req.headers.authorization?.split(' ')[1];
+    checkAuthorization(res, token);
+
+>>>>>>> 1c3b474 (feat: add api gateway)
     const deletedUser = await User.findByIdAndDelete(userId);
     if (!deletedUser) {
       return res.status(status.NOT_FOUND).json({

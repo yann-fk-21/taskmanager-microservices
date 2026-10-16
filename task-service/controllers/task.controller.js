@@ -1,6 +1,10 @@
 const Task = require('../models/task.model');
 const { status } = require('http-status');
+<<<<<<< HEAD
 const { getUserById } = require('../utils/utils');
+=======
+const { getUserById, checkAuthorization } = require('../utils/utils');
+>>>>>>> 1c3b474 (feat: add api gateway)
 
 const getTasks = async (req, res) => {
   try {
@@ -17,6 +21,10 @@ const getTasks = async (req, res) => {
 
 const getTasksByUserId = async (req, res) => {
   try {
+<<<<<<< HEAD
+=======
+    const token = req.headers.authorization?.split(' ')[1];
+>>>>>>> 1c3b474 (feat: add api gateway)
     const user_id = req.params.id;
     const fetchedUser = await getUserById(user_id);
 
@@ -26,6 +34,11 @@ const getTasksByUserId = async (req, res) => {
         .json({ message: 'User not found', tasks: [] });
     }
 
+<<<<<<< HEAD
+=======
+    checkAuthorization(res, token);
+
+>>>>>>> 1c3b474 (feat: add api gateway)
     const userTasks = await Task.find().where({ user_id: user_id }).exec();
     return res
       .status(status.OK)
@@ -62,6 +75,10 @@ const getTask = async (req, res) => {
 
 const createTask = async (req, res) => {
   try {
+<<<<<<< HEAD
+=======
+    const token = req.headers.authorization?.split(' ')[1];
+>>>>>>> 1c3b474 (feat: add api gateway)
     const { user_id } = req.body;
     const fetchedUser = await getUserById(user_id);
 
@@ -69,6 +86,11 @@ const createTask = async (req, res) => {
       return res.status(status.NOT_FOUND).json({ message: 'User not found!' });
     }
 
+<<<<<<< HEAD
+=======
+    checkAuthorization(res, token);
+
+>>>>>>> 1c3b474 (feat: add api gateway)
     const taskData = req.body;
     const createdTask = await Task.create(taskData);
     return res
@@ -87,10 +109,20 @@ const createTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
   try {
+<<<<<<< HEAD
     const taskId = req.params.id;
     const taskData = req.body;
     const task = await Task.findByIdAndUpdate(id, taskData);
 
+=======
+    const token = req.headers.authorization?.split(' ')[1];
+    const taskId = req.params.id;
+    const taskData = req.body;
+
+    checkAuthorization(res, token);
+
+    const task = await Task.findByIdAndUpdate(taskId, taskData);
+>>>>>>> 1c3b474 (feat: add api gateway)
     if (!task) {
       return res.status(status.NOT_FOUND).json({ message: 'Task not found!' });
     }
@@ -109,9 +141,18 @@ const updateTask = async (req, res) => {
 
 const deletetask = async (req, res) => {
   try {
+<<<<<<< HEAD
     const taskId = req.params.id;
     const deletedTask = await Task.findByIdAndDelete(taskId);
 
+=======
+    const token = req.headers.authorization?.split(' ')[1];
+    const taskId = req.params.id;
+
+    checkAuthorization(res, token);
+
+    const deletedTask = await Task.findByIdAndDelete(taskId);
+>>>>>>> 1c3b474 (feat: add api gateway)
     if (!deletedTask) {
       return res.status(status.NOT_FOUND).json({ message: 'Task not found!' });
     }

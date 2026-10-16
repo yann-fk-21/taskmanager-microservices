@@ -5,4 +5,11 @@
 /auth-service/node_modules/
 
 /task-service/.env
+<<<<<<< HEAD
 /task-service/node_modules/
+=======
+/task-service/node_modules/
+
+/task-manager-gateway/node_modules/
+/.env
+>>>>>>> 1c3b474 (feat: add api gateway)

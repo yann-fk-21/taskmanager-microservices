@@ -1,0 +1,107 @@
+services:
+  mongo:
+    image: mongo:8.0
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', 'db.adminCommand("ping").ok']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  user-service:
+    build:
+      context: ./user-service
+    restart: unless-stopped
+    environment:
+      PORT_USER_SERVICE: 8000
+      MONGO_DB_USER: mongodb://mongo:27017/users
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:8000/api/v1/users').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  auth-service:
+    build:
+      context: ./auth-service
+    restart: unless-stopped
+    environment:
+      PORT_AUTH_SERVICE: 8002
+      MONGO_DB_AUTH: mongodb://mongo:27017/auth
+      USER_SERVICE_URL: http://user-service:8000/api/v1/users
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env file}
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:8002/api/v1/auth/verify', { headers: { authorization: 'Bearer healthcheck' } }).then((r) => process.exit(r.status === 401 ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      mongo:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+
+  task-service:
+    build:
+      context: ./task-service
+    restart: unless-stopped
+    environment:
+      PORT_TASK_SERVICE: 8001
+      MONGO_DB_TASK: mongodb://mongo:27017/tasks
+      USER_SERVICE_URL: http://user-service:8000/api/v1/users
+      AUTH_SERVICE_URL: http://auth-service:8002/api/v1/auth
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:8001/api/v1/tasks').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      mongo:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+
+  gateway:
+    build:
+      context: ./task-manager-gateway
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    depends_on:
+      user-service:
+        condition: service_healthy
+      task-service:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+
+volumes:
+  mongo_data:

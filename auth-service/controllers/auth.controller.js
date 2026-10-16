@@ -83,6 +83,17 @@ const verifyToken = async (req, res) => {
       .json({ error: 'A Bearer token is required' });
   }
 
+<<<<<<< HEAD
+=======
+  const token = match[1];
+  const existingAuth = await Auth.findOne({ token }).exec();
+  if (!existingAuth) {
+    return res
+      .status(status.UNAUTHORIZED)
+      .json({ error: 'Invalid or expired token', is_valid: false });
+  }
+
+>>>>>>> 1c3b474 (feat: add api gateway)
   try {
     jwt.verify(match[1], process.env.JWT_SECRET);
     return res
